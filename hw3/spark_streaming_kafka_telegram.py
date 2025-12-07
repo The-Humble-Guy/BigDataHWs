@@ -13,7 +13,7 @@ SPARK_APP_NAME = "ProperNounsKafkaTelegram"
 SPARK_CHECKPOINT_DIR="checkpoint_telegram"
 SPARK_LOG_LEVEL = "ERROR"
 SPARK_BATCH_INTERVAL = 60       # 1 min
-WINDOW_LENGTH = 5 * 60         # 30 min 
+WINDOW_LENGTH = 30 * 60         # 30 min
 SLIDE_INTERVAL = 60             # window size in seconds
 
 OUTPUT_DIR = os.environ.get("OUTPUT_DIR")

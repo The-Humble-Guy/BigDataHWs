@@ -10,8 +10,11 @@ from telethon.tl.functions.channels import JoinChannelRequest, LeaveChannelReque
 from kafka import KafkaProducer
 import kafka.errors
 
+# Fetch all messages from telegram channels
+FETCH_ALL = False
+
 # Telegram API credentials
-API_ID = os.environ.get("APP_ID)"
+API_ID = os.environ.get("APP_ID")
 API_HASH = os.environ.get("API_HASH")
 
 if not all([API_ID, API_HASH]):
@@ -23,6 +26,7 @@ KAFKA_HOST = "localhost"
 KAFKA_PORT = "9092"
 TOPIC_NAME = "telegram-messages"
 
+# Note: Telegram channels from task are not available
 CHANNELS = [
     "@bazabazon",
     "@bbcrussian",
@@ -31,6 +35,10 @@ CHANNELS = [
     "@rian_ru",
     "@shot_shot",
     "@tass_agency",
+    "https://t.me/DtRoad",
+    "https://t.me/ENews112",
+    "https://t.me/mashkomnata",
+    "https://t.me/prohitec",
     "https://t.me/topor_novostnoy",
     "https://t.me/toporlive",
 ]
@@ -70,6 +78,23 @@ async def main():
             print(f"✅ Connected to channel: {entity.title}")
         except Exception as e:
             print(f"❌ Error connecting to channel {ch}: {e}")
+
+    if FETCH_ALL:
+        async def fetch_history():
+            for ch in entities:
+                print(f"⬇️ Loading history from {getattr(ch, 'title', ch)} ...")
+                async for message in client.iter_messages(ch, reverse=True):
+                    msg_data = {
+                        "channel": getattr(ch, "title", "Unknown"),
+                        "sender_id": getattr(message.sender_id, "id", None),
+                        "message": message.text,
+                        "date": str(message.date)
+                    }
+                    json_data = json.dumps(msg_data, ensure_ascii=False)
+                    communicator.send(json_data)
+                print(f"✅ History loaded for {getattr(ch, 'title', ch)}")
+
+        await fetch_history()
 
     # Handle new messages
     # @client.on(events.NewMessage(chats=CHANNELS))
